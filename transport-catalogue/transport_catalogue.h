@@ -1,1 +1,178 @@
-// место для вашего кода
+#pragma once
+
+#include <string>
+#include <unordered_set>
+#include <vector>
+#include <numeric>
+#include <algorithm>
+#include <unordered_map>
+#include <set>
+
+#include "geo.h"
+
+#include "domain.h"
+
+namespace transport_catalogue {
+
+
+	using std::string;
+
+	namespace objects {
+
+
+		struct Stop {
+			Stop(string name, double latitude, double longitude)
+				: name_(name)
+			{
+				coordinates.lat = latitude;
+				coordinates.lng = longitude;
+			}
+
+			Stop(string name = "Error")
+				: name_(name)
+			{
+			}
+
+
+			string name_;
+			geo::Coordinates coordinates;
+
+			bool operator==(const Stop& other) const {
+				return this->name_ == other.name_;
+			}
+
+			bool operator<(const Stop& other) const {
+				return this->name_ < other.name_;
+			}
+
+		};
+
+		struct Bus {
+			Bus(string name, std::vector<const Stop*> stops_of_bus, bool is_looped)
+				: name_(name), stops_of_bus_(stops_of_bus), is_looped_(is_looped)
+			{
+			}
+
+			Bus(string name = "Error")
+				: name_(name)
+			{
+			}
+
+			string name_;
+			std::vector<const Stop*> stops_of_bus_;
+			bool is_looped_;
+
+			bool operator==(const Bus& other) const {
+				return this->name_ == other.name_;
+			}
+
+			bool operator<(const Bus& other) const {
+				return this->name_ < other.name_;
+			}
+
+		};
+
+		struct BusInfo {
+			size_t stops_num_;
+			int unique_stops_num_;
+			double distance_length_;
+			double real_distance_length_;
+			double curvature_;
+		};
+
+		class StopHasher {
+		public:
+			size_t operator()(const Stop& stop) const {
+				return static_cast<size_t>(hasher_(stop.name_));
+			}
+
+		private:
+			std::hash<string> hasher_;
+		};
+
+		class BusHasher {
+		public:
+			size_t operator()(const Bus& bus) const {
+				return static_cast<size_t>(hasher_(bus.name_));
+			}
+
+		private:
+			std::hash<string> hasher_;
+		};
+
+		class BusPtrHasher {
+		public:
+			size_t operator()(const Bus* bus) const {
+				return static_cast<size_t>(hasher_(bus->name_));
+			}
+
+		private:
+			std::hash<string> hasher_;
+		};
+
+
+	}
+
+	using namespace objects;
+
+	class TransportCatalogue {
+
+	public:
+
+		struct StopsHasher {
+			size_t operator()(const std::pair<const Stop*, const Stop*>& two_stops) const {
+				size_t h_1 = hasher_(two_stops.first);
+				size_t h_2 = hasher_(two_stops.second);
+				return h_2 * 12 + h_1 * (12 * 12);
+			}
+
+		private:
+			std::hash<const void*> hasher_;
+
+		};
+
+		void AddStop(string& name, double latitude, double longitude);
+
+		void AddBus(string& name, std::vector<const Stop*>& stops_of_bus, bool is_looped);
+
+		const Stop& FindStop(const string& name);
+
+		const Bus& FindBus(const string& name);
+
+		void SetBusInfo(const string& name);
+
+		void SetDistanceBetweenStops(std::string stop_name, std::string next_stop_name, double distance);
+
+	public:
+
+		BusInfo GetBusInfo(const string& name);
+
+		std::unordered_map<std::string_view, std::set<std::string_view>>& GetBTS();
+
+		std::unordered_map<std::string_view, std::set<std::string_view>>& GetStopsToBuses();
+
+		double GetDistanceBetweenStops(std::string stop_name, std::string next_stop_name);
+
+		double GetDistanceBetweenStops(const Stop* stop, const Stop* next_stop);
+
+		const std::unordered_set<Stop, StopHasher>& GetStops() const;
+
+		const std::unordered_set<Bus, BusHasher>& GetBuses() const;
+
+	private:
+		std::unordered_set<Stop, StopHasher> stops_;
+		std::unordered_set<Bus, BusHasher> buses_;
+		std::unordered_map<std::string_view, std::set<std::string_view>> buses_to_stops;
+		std::unordered_map<std::string_view, std::set<std::string_view>> stops_to_buses;
+		std::unordered_map<const std::pair<const Stop*, const Stop*>, double, StopsHasher> stop_pair_to_distance_;
+		std::unordered_map<std::string_view, BusInfo> bus_infos;
+	};
+
+	namespace SetBusInfo_parts {
+		objects::BusInfo& create_looped_bus_info(transport_catalogue::TransportCatalogue& transport_catalogue, objects::BusInfo& bi, const objects::Bus& bus);
+		objects::BusInfo& create_turning_bus_info(transport_catalogue::TransportCatalogue& transport_catalogue, objects::BusInfo& bi, const objects::Bus& bus);
+	}
+
+}
+
+
