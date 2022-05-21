@@ -1,5 +1,7 @@
 #include "map_renderer.h"
 
+using namespace map_renderer;
+
 void MapRenderer::RenderMap(transport_catalogue::TransportCatalogue& transport_catalogue, std::ostringstream& ostrm) {
 
 	// Вычисляются переменные, которые далее будут использоваться для отрисовки маршрутов

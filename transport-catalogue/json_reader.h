@@ -1,25 +1,32 @@
 #pragma once
 
 #include "json.h"
+#include "reguest_handler.h"
 #include "map_renderer.h"
 #include "transport_catalogue.h"
 
 namespace json_reader {
 
-	void Reader(transport_catalogue::TransportCatalogue& catalog, MapRenderer& map_renderer, std::istream& input, std::ostream& output);
+	class JsonReader {
+	public:
+		JsonReader(transport_catalogue::TransportCatalogue& catalog, map_renderer::MapRenderer& map_renderer);
+		void Reader(std::istream& input, std::ostream& output);
 
-	////////// base_requests //////////
-	void CompleteCatalog(transport_catalogue::TransportCatalogue& catalog, json::Array& value);
-	void AddStop(transport_catalogue::TransportCatalogue& catalog, const json::Dict& stop);
-	void AddBus(transport_catalogue::TransportCatalogue& catalog, const json::Dict& bus);
+	private:
+		////////// base_requests //////////
+		void CompleteCatalog(json::Array& value);
+		void AddStop(const json::Dict& stop);
+		void AddBus(const json::Dict& bus);
 
-	////////// stat_requests //////////
-	void ProcessRequest(transport_catalogue::TransportCatalogue& catalog, MapRenderer& map_renderer, json::Array& value, std::ostream& output);
+		////////// render_requests //////////
+		void Render(const json::Dict& value);
+		void RenderSimpleSettings(const json::Dict& value);
+		void RenderArraySettings(const json::Dict& value);
+		void RenderVariantSettings(const json::Dict& value);
 
-	////////// render_requests //////////
-	void Render(MapRenderer& map_renderer, const json::Dict& value);
-	void RenderSimpleSettings(MapRenderer& map_renderer, const json::Dict& value);
-	void RenderArraySettings(MapRenderer& map_renderer, const json::Dict& value);
-	void RenderVariantSettings(MapRenderer& map_renderer, const json::Dict& value);
+	private:
+		transport_catalogue::TransportCatalogue& catalog_;
+		map_renderer::MapRenderer& map_renderer_;
+	};
 
 }

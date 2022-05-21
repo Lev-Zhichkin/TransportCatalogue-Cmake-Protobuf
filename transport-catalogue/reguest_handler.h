@@ -3,7 +3,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include<stdio.h>
+#include <stdio.h>
 #include <utility>
 #include <map>
 
@@ -15,10 +15,21 @@
 
 #include "domain.h"
 
-namespace reguest_handler {
+namespace request_handler {
 
-	void PrintStopInformation(transport_catalogue::TransportCatalogue& catalog, const json::Dict& value, std::ostream& output);
-	void PrintBusInformation(transport_catalogue::TransportCatalogue& catalog, const json::Dict& value, std::ostream& output);
-	void PrintMap(transport_catalogue::TransportCatalogue& transport_catalogue, MapRenderer& map_renderer, const json::Dict& value, std::ostream& output);
+	class RequestHandler {
+	public:
+		RequestHandler(transport_catalogue::TransportCatalogue& catalog, map_renderer::MapRenderer& map_renderer);
+		void ProcessRequest(json::Array& value, std::ostream& output);
+
+	private:
+		void PrintStopInformation(const json::Dict& value, std::ostream& output);
+		void PrintBusInformation(const json::Dict& value, std::ostream& output);
+		void PrintMap(const json::Dict& value, std::ostream& output);
+
+	private:
+		transport_catalogue::TransportCatalogue& catalog_;
+		map_renderer::MapRenderer& map_renderer_;
+	};
 
 }
