@@ -9,5 +9,5 @@
 int main() {
 	transport_catalogue::TransportCatalogue TC;
 	MapRenderer MR;
-	Reader(TC, MR, std::cin, std::cout);
+	json_reader::Reader(TC, MR, std::cin, std::cout);
 }

@@ -2,6 +2,68 @@
 
 using namespace transport_catalogue;
 
+// Objects
+
+Stop::Stop(std::string name, double latitude, double longitude)
+	: name_(name)
+{
+	coordinates.lat = latitude;
+	coordinates.lng = longitude;
+}
+
+Stop::Stop(string name)
+	: name_(name)
+{
+}
+
+bool Stop::operator==(const Stop& other) const {
+	return this->name_ == other.name_;
+}
+
+bool Stop::operator<(const Stop& other) const {
+	return this->name_ < other.name_;
+}
+
+
+Bus::Bus(string name, std::vector<const Stop*> stops_of_bus, bool is_looped)
+	: name_(name), stops_of_bus_(stops_of_bus), is_looped_(is_looped)
+{
+}
+
+Bus::Bus(string name)
+	: name_(name)
+{
+}
+
+bool Bus::operator==(const Bus& other) const {
+	return this->name_ == other.name_;
+}
+
+bool Bus::operator<(const Bus& other) const {
+	return this->name_ < other.name_;
+}
+
+
+size_t StopHasher::operator()(const Stop& stop) const {
+	return static_cast<size_t>(hasher_(stop.name_));
+}
+
+size_t BusHasher::operator()(const Bus& bus) const {
+	return static_cast<size_t>(hasher_(bus.name_));
+}
+
+size_t BusPtrHasher::operator()(const Bus* bus) const {
+	return static_cast<size_t>(hasher_(bus->name_));
+}
+
+// Main code
+
+size_t TransportCatalogue::StopsHasher::operator()(const std::pair<const Stop*, const Stop*>& two_stops) const {
+	size_t h_1 = hasher_(two_stops.first);
+	size_t h_2 = hasher_(two_stops.second);
+	return h_2 * 12 + h_1 * (12 * 12);
+}
+
 void TransportCatalogue::AddStop(string& name, double latitude, double longitude) {
 	Stop stop(name, latitude, longitude);
 	stops_.insert(std::move(stop));

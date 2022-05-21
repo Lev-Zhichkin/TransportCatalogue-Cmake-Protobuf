@@ -1,12 +1,13 @@
-﻿#include "json_reader.h"
-#include "json_builder.h"
+﻿#include "reguest_handler.h"
+#include "json_reader.h"
 
 
 using namespace transport_catalogue;
 using namespace json;
 using namespace std::literals;
+using namespace reguest_handler;
 
-void Reader(TransportCatalogue& catalog, MapRenderer& map_renderer, std::istream& input, std::ostream& output) {
+void json_reader::Reader(TransportCatalogue& catalog, MapRenderer& map_renderer, std::istream& input, std::ostream& output) {
     //Timer timer("READER");
     Dict root = Load(input).GetRoot().AsMap();
     Array content_base = root.at("base_requests"s).AsArray();
@@ -19,7 +20,7 @@ void Reader(TransportCatalogue& catalog, MapRenderer& map_renderer, std::istream
 }
 
 ////////// base_requests //////////
-void CompleteCatalog(TransportCatalogue& catalog, Array& value) {
+void json_reader::CompleteCatalog(TransportCatalogue& catalog, Array& value) {
     //Timer timer("COMPLETING CATALOG");
 
     std::vector<json::Node> bus_descriptions;
@@ -53,7 +54,7 @@ void CompleteCatalog(TransportCatalogue& catalog, Array& value) {
 
 }
 
-void AddStop(TransportCatalogue& catalog, const Dict& stop) {
+void json_reader::AddStop(TransportCatalogue& catalog, const Dict& stop) {
     std::string name;
     double latitude;
     double longitude;
@@ -65,7 +66,7 @@ void AddStop(TransportCatalogue& catalog, const Dict& stop) {
     catalog.AddStop(name, latitude, longitude);
 }
 
-void AddBus(TransportCatalogue& catalog, const Dict& bus) {
+void json_reader::AddBus(TransportCatalogue& catalog, const Dict& bus) {
     std::string name;
     Array stope;
     bool is_roundtrip;
@@ -85,7 +86,7 @@ void AddBus(TransportCatalogue& catalog, const Dict& bus) {
 //-------- base_requests //--------
 
 ////////// stat_requests //////////
-void ProcessRequest(TransportCatalogue& catalog, MapRenderer& map_renderer, Array& value, std::ostream& output) {
+void json_reader::ProcessRequest(TransportCatalogue& catalog, MapRenderer& map_renderer, Array& value, std::ostream& output) {
     //Timer timer("PROCESSING REGUEST");
 
     std::cout << "[" << std::endl;
@@ -96,19 +97,19 @@ void ProcessRequest(TransportCatalogue& catalog, MapRenderer& map_renderer, Arra
             if (f == true) {
                 std::cout << "," << std::endl;
             }
-            PrintStopInformation(catalog, description.AsMap(), output);
+            reguest_handler::PrintStopInformation(catalog, description.AsMap(), output);
         }
         else if (description.AsMap().at("type"s) == "Bus"s) {
             if (f == true) {
                 std::cout << "," << std::endl;
             }
-            PrintBusInformation(catalog, description.AsMap(), output);
+            reguest_handler::PrintBusInformation(catalog, description.AsMap(), output);
         }
         else if (description.AsMap().at("type"s) == "Map"s) {
             if (f == true) {
                 std::cout << "," << std::endl;
             }
-            PrintMap(catalog, map_renderer, description.AsMap(), output);
+            reguest_handler::PrintMap(catalog, map_renderer, description.AsMap(), output);
         }
         f = true;
     }
@@ -117,68 +118,7 @@ void ProcessRequest(TransportCatalogue& catalog, MapRenderer& map_renderer, Arra
 
 }
 
-void PrintStopInformation(TransportCatalogue& catalog, const Dict& value, std::ostream& output) {
-    //Timer timer("STOP INFORMATION PRINTING");
-
-    int id;
-    std::string name;
-
-    id = value.at("id"s).AsInt();
-    name = value.at("name"s).AsString();
-    Array bus_names;
-
-    Stop stop = catalog.FindStop(name);
-
-    //тут как бы для меня самое не понятное - как вывести инфу в консоль используя json
-    if (stop.name_ == "Error"s) {
-        //типа вывести это
-        Print(json::Document(json::Builder{}.StartDict().Key("request_id"s).Value(id).Key("error_message"s).Value("not found"s).EndDict().Build()), output);
-    }
-    else {
-        std::set<std::string_view> buses = catalog.GetBTS().at(name);
-        for (auto& bus : buses) {
-            bus_names.push_back(std::string(bus));
-        }
-
-        //и вывести это
-        Print(json::Document(json::Builder{}.StartDict().Key("buses"s).Value(bus_names).Key("request_id"s).Value(id).EndDict().Build()), output);
-    }
-}
-
-void PrintBusInformation(TransportCatalogue& catalog, const Dict& value, std::ostream& output) {
-    //Timer timer("BUS INFORMATION PRINTING");
-
-    std::string name;
-    double curvature;
-    int id;
-    double route_length;
-    size_t stop_count;
-    size_t unique_stop_count;
-
-    name = value.at("name"s).AsString();
-    id = value.at("id"s).AsInt();
-
-    Bus route = catalog.FindBus(name);
-    //тут как бы для меня самое не понятное - как вывести инфу в консоль используя json
-    if (route.name_ == "Error"s) {
-        //типа вывести это
-        Print(json::Document(json::Builder{}.StartDict().Key("request_id"s).Value(id).Key("error_message"s).Value("not found"s).EndDict().Build()), output);
-        return;
-    }
-
-    BusInfo info = catalog.GetBusInfo(value.at("name"s).AsString());
-    curvature = info.curvature_;
-    route_length = info.real_distance_length_;
-    stop_count = info.stops_num_;
-    unique_stop_count = info.unique_stops_num_;
-
-    Print(json::Document(json::Builder{}.StartDict().Key("curvature"s).Value(curvature).Key("request_id").Value(id).Key("route_length"s).Value(route_length).Key("stop_count"s).Value((int)stop_count).Key("unique_stop_count"s).Value((int)unique_stop_count).EndDict().Build()), output);
-
-}
-//-------- stat_requests //--------
-
-////////// render_requests //////////
-void Render(MapRenderer& map_renderer, const Dict& value) {
+void json_reader::Render(MapRenderer& map_renderer, const Dict& value) {
 
     RenderSimpleSettings(map_renderer, value);
 
@@ -188,7 +128,7 @@ void Render(MapRenderer& map_renderer, const Dict& value) {
 
 }
 
-void RenderSimpleSettings(MapRenderer& map_renderer, const Dict& value) {
+void json_reader::RenderSimpleSettings(MapRenderer& map_renderer, const Dict& value) {
     map_renderer.settings.width = value.at("width").AsDouble();
     map_renderer.settings.height = value.at("height").AsDouble();
     map_renderer.settings.padding = value.at("padding").AsDouble();
@@ -199,7 +139,7 @@ void RenderSimpleSettings(MapRenderer& map_renderer, const Dict& value) {
     map_renderer.settings.underlayer_width = value.at("underlayer_width").AsDouble();
 }
 
-void RenderArraySettings(MapRenderer& map_renderer, const Dict& value) {
+void json_reader::RenderArraySettings(MapRenderer& map_renderer, const Dict& value) {
     // Bus label offset
     Array bus_label_offset_arr = value.at("bus_label_offset").AsArray();
     svg::Point bus_label_offset;
@@ -233,7 +173,7 @@ void RenderArraySettings(MapRenderer& map_renderer, const Dict& value) {
     map_renderer.settings.stop_label_offset = stop_label_offset;
 }
 
-void RenderVariantSettings(MapRenderer& map_renderer, const Dict& value) {
+void json_reader::RenderVariantSettings(MapRenderer& map_renderer, const Dict& value) {
     // Underlayer color
     if (value.at("underlayer_color").IsString()) {
         std::string underlayer_color = value.at("underlayer_color").AsString();
@@ -301,11 +241,3 @@ void RenderVariantSettings(MapRenderer& map_renderer, const Dict& value) {
     }
     map_renderer.settings.color_palette = color_palette;
 }
-
-void PrintMap(transport_catalogue::TransportCatalogue& transport_catalogue, MapRenderer& map_renderer, const Dict& value, std::ostream& output) {
-    int id = value.at("id"s).AsInt();
-    std::ostringstream svg;
-    map_renderer.RenderMap(transport_catalogue, svg);
-    Print(json::Document(Builder{}.StartDict().Key("map"s).Value(svg.str()).Key("request_id"s).Value(id).EndDict().Build()), output);
-}
-//-------- render_requests //--------

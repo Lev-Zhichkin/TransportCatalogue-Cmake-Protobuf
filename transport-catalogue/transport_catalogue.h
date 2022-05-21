@@ -21,54 +21,32 @@ namespace transport_catalogue {
 
 
 		struct Stop {
-			Stop(string name, double latitude, double longitude)
-				: name_(name)
-			{
-				coordinates.lat = latitude;
-				coordinates.lng = longitude;
-			}
+			Stop(string name, double latitude, double longitude);
 
-			Stop(string name = "Error")
-				: name_(name)
-			{
-			}
+			Stop(string name = "Error");
 
 
 			string name_;
 			geo::Coordinates coordinates;
 
-			bool operator==(const Stop& other) const {
-				return this->name_ == other.name_;
-			}
+			bool operator==(const Stop& other) const;
 
-			bool operator<(const Stop& other) const {
-				return this->name_ < other.name_;
-			}
+			bool operator<(const Stop& other) const;
 
 		};
 
 		struct Bus {
-			Bus(string name, std::vector<const Stop*> stops_of_bus, bool is_looped)
-				: name_(name), stops_of_bus_(stops_of_bus), is_looped_(is_looped)
-			{
-			}
+			Bus(string name, std::vector<const Stop*> stops_of_bus, bool is_looped);
 
-			Bus(string name = "Error")
-				: name_(name)
-			{
-			}
+			Bus(string name = "Error");
 
 			string name_;
 			std::vector<const Stop*> stops_of_bus_;
 			bool is_looped_;
 
-			bool operator==(const Bus& other) const {
-				return this->name_ == other.name_;
-			}
+			bool operator==(const Bus& other) const;
 
-			bool operator<(const Bus& other) const {
-				return this->name_ < other.name_;
-			}
+			bool operator<(const Bus& other) const;
 
 		};
 
@@ -82,9 +60,7 @@ namespace transport_catalogue {
 
 		class StopHasher {
 		public:
-			size_t operator()(const Stop& stop) const {
-				return static_cast<size_t>(hasher_(stop.name_));
-			}
+			size_t operator()(const Stop& stop) const;
 
 		private:
 			std::hash<string> hasher_;
@@ -92,9 +68,7 @@ namespace transport_catalogue {
 
 		class BusHasher {
 		public:
-			size_t operator()(const Bus& bus) const {
-				return static_cast<size_t>(hasher_(bus.name_));
-			}
+			size_t operator()(const Bus& bus) const;
 
 		private:
 			std::hash<string> hasher_;
@@ -102,9 +76,7 @@ namespace transport_catalogue {
 
 		class BusPtrHasher {
 		public:
-			size_t operator()(const Bus* bus) const {
-				return static_cast<size_t>(hasher_(bus->name_));
-			}
+			size_t operator()(const Bus* bus) const;
 
 		private:
 			std::hash<string> hasher_;
@@ -120,11 +92,7 @@ namespace transport_catalogue {
 	public:
 
 		struct StopsHasher {
-			size_t operator()(const std::pair<const Stop*, const Stop*>& two_stops) const {
-				size_t h_1 = hasher_(two_stops.first);
-				size_t h_2 = hasher_(two_stops.second);
-				return h_2 * 12 + h_1 * (12 * 12);
-			}
+			size_t operator()(const std::pair<const Stop*, const Stop*>& two_stops) const;
 
 		private:
 			std::hash<const void*> hasher_;
