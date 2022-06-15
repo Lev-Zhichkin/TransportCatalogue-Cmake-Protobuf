@@ -1,7 +1,7 @@
 #pragma once
 
 #include "json.h"
-#include "reguest_handler.h"
+#include "request_handler.h"
 #include "map_renderer.h"
 #include "transport_catalogue.h"
 
@@ -23,6 +23,9 @@ namespace json_reader {
 		void RenderSimpleSettings(const json::Dict& value);
 		void RenderArraySettings(const json::Dict& value);
 		void RenderVariantSettings(const json::Dict& value);
+
+		////////// routing_settings //////////
+		transport_router::RouterSettings SetRouterSettings(json::Dict& routing_settings);  ////////////////////////////////////////////////////
 
 	private:
 		transport_catalogue::TransportCatalogue& catalog_;

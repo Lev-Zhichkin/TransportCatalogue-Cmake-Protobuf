@@ -54,7 +54,7 @@ namespace transport_catalogue {
 			size_t stops_num_;
 			int unique_stops_num_;
 			double distance_length_;
-			double real_distance_length_;
+			double real_distance_length_ = 0;
 			double curvature_;
 		};
 
@@ -103,9 +103,9 @@ namespace transport_catalogue {
 
 		void AddBus(string& name, std::vector<const Stop*>& stops_of_bus, bool is_looped);
 
-		const Stop& FindStop(const string& name);
+		const Stop& FindStop(const string& name) const;
 
-		const Bus& FindBus(const string& name);
+		const Bus& FindBus(const string& name) const;
 
 		void SetBusInfo(const string& name);
 
@@ -119,9 +119,9 @@ namespace transport_catalogue {
 
 		std::unordered_map<std::string_view, std::set<std::string_view>>& GetStopsToBuses();
 
-		double GetDistanceBetweenStops(std::string stop_name, std::string next_stop_name);
+		double GetDistanceBetweenStops(std::string stop_name, std::string next_stop_name) const;
 
-		double GetDistanceBetweenStops(const Stop* stop, const Stop* next_stop);
+		double GetDistanceBetweenStops(const Stop* stop, const Stop* next_stop) const;
 
 		const std::unordered_set<Stop, StopHasher>& GetStops() const;
 

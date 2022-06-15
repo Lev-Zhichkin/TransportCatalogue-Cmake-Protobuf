@@ -81,7 +81,7 @@ void TransportCatalogue::AddBus(string& name, std::vector<const Stop*>& stops_of
 	}
 }
 
-const Stop& TransportCatalogue::FindStop(const string& name) {
+const Stop& TransportCatalogue::FindStop(const string& name) const {
 	for (const Stop& stop : stops_) {
 		if (stop.name_ == name) {
 			return stop;
@@ -91,7 +91,7 @@ const Stop& TransportCatalogue::FindStop(const string& name) {
 	return stop;
 }
 
-const Bus& TransportCatalogue::FindBus(const string& name) {
+const Bus& TransportCatalogue::FindBus(const string& name) const {
 	for (const Bus& bus : buses_) {
 		if (bus.name_ == name) {
 			return bus;
@@ -216,7 +216,7 @@ void TransportCatalogue::SetDistanceBetweenStops(string stop_name, string next_s
 	stop_pair_to_distance_.insert_or_assign(std::make_pair(stop, next_stop), distance);
 }
 
-double TransportCatalogue::GetDistanceBetweenStops(std::string stop_name, std::string next_stop_name) {
+double TransportCatalogue::GetDistanceBetweenStops(std::string stop_name, std::string next_stop_name) const {
 	auto stops = std::make_pair(&FindStop(stop_name), &FindStop(next_stop_name));
 	double result = 0;
 	if (stop_pair_to_distance_.count(stops)) {
@@ -228,7 +228,7 @@ double TransportCatalogue::GetDistanceBetweenStops(std::string stop_name, std::s
 	return result;
 }
 
-double TransportCatalogue::GetDistanceBetweenStops(const Stop* stop, const Stop* next_stop) {
+double TransportCatalogue::GetDistanceBetweenStops(const Stop* stop, const Stop* next_stop) const {
 	auto stops = std::make_pair(stop, next_stop);
 	double result = 0;
 	if (stop_pair_to_distance_.count(stops)) {

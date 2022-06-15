@@ -8,7 +8,7 @@ using namespace std::literals;
 using namespace request_handler;
 using namespace json_reader;
 
-JsonReader::JsonReader(transport_catalogue::TransportCatalogue& catalog, map_renderer::MapRenderer& map_renderer) 
+JsonReader::JsonReader(transport_catalogue::TransportCatalogue& catalog, map_renderer::MapRenderer& map_renderer)
 : catalog_(catalog), map_renderer_(map_renderer)
 {
 }
@@ -19,11 +19,14 @@ void JsonReader::Reader(std::istream& input, std::ostream& output) {
     Array content_base = root.at("base_requests"s).AsArray();
     Dict render_info = root.at("render_settings").AsMap();
     Array content_state = root.at("stat_requests"s).AsArray();
+    Dict routing_settings = root.at("routing_settings"s).AsMap();
 
     CompleteCatalog(content_base);
     Render(render_info);
 
-    RequestHandler request_handler(catalog_, map_renderer_);
+    transport_router::RouterSettings router_settings = SetRouterSettings(routing_settings);
+
+    RequestHandler request_handler(catalog_, map_renderer_, router_settings);
     request_handler.ProcessRequest(content_state, output);
 }
 
@@ -215,4 +218,12 @@ void JsonReader::RenderVariantSettings(const Dict& value) {
         }
     }
     map_renderer_.settings.color_palette = color_palette;
+}
+
+////////// routing_settings //////////
+transport_router::RouterSettings JsonReader::SetRouterSettings(json::Dict& routing_settings) {
+    transport_router::RouterSettings settings;
+    settings.bus_wait_time_ = routing_settings.at("bus_wait_time").AsInt();
+    settings.bus_velocity_ = static_cast<double>(routing_settings.at("bus_velocity").AsInt()) * (1000. / 60.);
+    return settings;
 }
