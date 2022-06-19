@@ -2,6 +2,14 @@
 
 using namespace map_renderer;
 
+bool MapRenderer::routes_comparator::operator() (std::pair<const transport_catalogue::Bus*, std::vector<const transport_catalogue::Stop*>> a, std::pair<const transport_catalogue::Bus*, std::vector<const transport_catalogue::Stop*>> b) const {
+	return a.first->name_ < b.first->name_;
+}
+
+bool MapRenderer::stops_comparator::operator() (transport_catalogue::Stop a, transport_catalogue::Stop b) const {
+	return a.name_ < b.name_;
+}
+
 void MapRenderer::RenderMap(transport_catalogue::TransportCatalogue& transport_catalogue, std::ostringstream& ostrm) {
 
 	// Вычисляются переменные, которые далее будут использоваться для отрисовки маршрутов

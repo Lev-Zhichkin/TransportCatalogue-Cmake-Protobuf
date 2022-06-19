@@ -34,15 +34,11 @@ namespace map_renderer {
 
 	private:
 		struct routes_comparator {
-			bool operator() (std::pair<const transport_catalogue::Bus*, std::vector<const transport_catalogue::Stop*>> a, std::pair<const transport_catalogue::Bus*, std::vector<const transport_catalogue::Stop*>> b) const {
-				return a.first->name_ < b.first->name_;
-			}
+			bool operator() (std::pair<const transport_catalogue::Bus*, std::vector<const transport_catalogue::Stop*>> a, std::pair<const transport_catalogue::Bus*, std::vector<const transport_catalogue::Stop*>> b) const;
 		};
 
 		struct stops_comparator {
-			bool operator() (transport_catalogue::Stop a, transport_catalogue::Stop b) const {
-				return a.name_ < b.name_;
-			}
+			bool operator() (transport_catalogue::Stop a, transport_catalogue::Stop b) const;
 		};
 
 	public:
