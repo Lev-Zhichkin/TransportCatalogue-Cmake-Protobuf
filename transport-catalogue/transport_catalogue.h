@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <unordered_map>
 #include <set>
+#include <string_view>
 
 #include "geo.h"
 
@@ -82,6 +83,19 @@ namespace transport_catalogue {
 			std::hash<string> hasher_;
 		};
 
+		struct StopsHasher {
+			size_t operator()(const std::pair<const Stop*, const Stop*>& two_stops) const;
+
+		private:
+			std::hash<const void*> hasher_;
+
+		};
+
+		struct PairStopsHasher {
+			size_t operator() (const std::pair<const transport_catalogue::objects::Stop*, const transport_catalogue::objects::Stop*>& stops) const;
+		private:
+			std::hash<const void*> pair_hasher_;
+		};
 
 	}
 
@@ -91,23 +105,21 @@ namespace transport_catalogue {
 
 	public:
 
-		struct StopsHasher {
-			size_t operator()(const std::pair<const Stop*, const Stop*>& two_stops) const;
-
-		private:
-			std::hash<const void*> hasher_;
-
-		};
-
 		void AddStop(string& name, double latitude, double longitude);
 
+		void AddStopSerialization(std::string_view name, double latitude, double longitude);
+
 		void AddBus(string& name, std::vector<const Stop*>& stops_of_bus, bool is_looped);
+
+		void AddBusSerialization(const std::string_view name, const std::vector<std::string_view>& stops_of_bus, const bool is_looped);
 
 		const Stop& FindStop(const string& name) const;
 
 		const Bus& FindBus(const string& name) const;
 
 		void SetBusInfo(const string& name);
+
+		void SetBusInfo(const Bus& bus);
 
 		void SetDistanceBetweenStops(std::string stop_name, std::string next_stop_name, double distance);
 
@@ -126,6 +138,8 @@ namespace transport_catalogue {
 		const std::unordered_set<Stop, StopHasher>& GetStops() const;
 
 		const std::unordered_set<Bus, BusHasher>& GetBuses() const;
+
+		const std::unordered_map<const std::pair<const Stop*, const Stop*>, double, StopsHasher>  GetAllDistances() const;
 
 	private:
 		std::unordered_set<Stop, StopHasher> stops_;

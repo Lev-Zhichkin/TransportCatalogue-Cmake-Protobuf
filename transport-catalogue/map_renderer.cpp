@@ -2,17 +2,9 @@
 
 using namespace map_renderer;
 
-bool MapRenderer::routes_comparator::operator() (std::pair<const transport_catalogue::Bus*, std::vector<const transport_catalogue::Stop*>> a, std::pair<const transport_catalogue::Bus*, std::vector<const transport_catalogue::Stop*>> b) const {
-	return a.first->name_ < b.first->name_;
-}
-
-bool MapRenderer::stops_comparator::operator() (transport_catalogue::Stop a, transport_catalogue::Stop b) const {
-	return a.name_ < b.name_;
-}
-
 void MapRenderer::RenderMap(transport_catalogue::TransportCatalogue& transport_catalogue, std::ostringstream& ostrm) {
 
-	// Вычисляются переменные, которые далее будут использоваться для отрисовки маршрутов
+	// Р’С‹С‡РёСЃР»СЏСЋС‚СЃСЏ РїРµСЂРµРјРµРЅРЅС‹Рµ, РєРѕС‚РѕСЂС‹Рµ РґР°Р»РµРµ Р±СѓРґСѓС‚ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊСЃСЏ РґР»СЏ РѕС‚СЂРёСЃРѕРІРєРё РјР°СЂС€СЂСѓС‚РѕРІ
 	const std::unordered_set<transport_catalogue::Stop, transport_catalogue::StopHasher>& stops = transport_catalogue.GetStops();
 	std::unordered_set<transport_catalogue::Stop, transport_catalogue::StopHasher> unempty_stops;
 	for (const transport_catalogue::Stop& stop : stops) {
@@ -56,7 +48,7 @@ void MapRenderer::RenderMap(transport_catalogue::TransportCatalogue& transport_c
 		zoom_coef = height_zoom_coef;
 	}
 
-	// Создать и вычислить распределение маршрутов на карте
+	// РЎРѕР·РґР°С‚СЊ Рё РІС‹С‡РёСЃР»РёС‚СЊ СЂР°СЃРїСЂРµРґРµР»РµРЅРёРµ РјР°СЂС€СЂСѓС‚РѕРІ РЅР° РєР°СЂС‚Рµ
 	std::set<std::pair<const transport_catalogue::Bus*, std::vector<const transport_catalogue::Stop*>>, routes_comparator> routes;
 	for (const transport_catalogue::Bus& bus : transport_catalogue.GetBuses()) {
 		if (!bus.stops_of_bus_.empty()) {
@@ -67,13 +59,13 @@ void MapRenderer::RenderMap(transport_catalogue::TransportCatalogue& transport_c
 	}
 
 
-	// Отрисовка линий по возрастанию названия маршрута
+	// РћС‚СЂРёСЃРѕРІРєР° Р»РёРЅРёР№ РїРѕ РІРѕР·СЂР°СЃС‚Р°РЅРёСЋ РЅР°Р·РІР°РЅРёСЏ РјР°СЂС€СЂСѓС‚Р°
 	DrawLines(routes);
-	// Отрисовка названий маршрутов(автобусов) по возрастанию названия маршрута(автобуса)
+	// РћС‚СЂРёСЃРѕРІРєР° РЅР°Р·РІР°РЅРёР№ РјР°СЂС€СЂСѓС‚РѕРІ(Р°РІС‚РѕР±СѓСЃРѕРІ) РїРѕ РІРѕР·СЂР°СЃС‚Р°РЅРёСЋ РЅР°Р·РІР°РЅРёСЏ РјР°СЂС€СЂСѓС‚Р°(Р°РІС‚РѕР±СѓСЃР°)
 	DrawBusNames(routes);
-	// Отрисовка кругов(остановок) по возрастанию маршрута, без повторений одной и той же остановки, по порядку возрастания названия маршрута(автобуса)
+	// РћС‚СЂРёСЃРѕРІРєР° РєСЂСѓРіРѕРІ(РѕСЃС‚Р°РЅРѕРІРѕРє) РїРѕ РІРѕР·СЂР°СЃС‚Р°РЅРёСЋ РјР°СЂС€СЂСѓС‚Р°, Р±РµР· РїРѕРІС‚РѕСЂРµРЅРёР№ РѕРґРЅРѕР№ Рё С‚РѕР№ Р¶Рµ РѕСЃС‚Р°РЅРѕРІРєРё, РїРѕ РїРѕСЂСЏРґРєСѓ РІРѕР·СЂР°СЃС‚Р°РЅРёСЏ РЅР°Р·РІР°РЅРёСЏ РјР°СЂС€СЂСѓС‚Р°(Р°РІС‚РѕР±СѓСЃР°)
 	DrawStops(transport_catalogue);
-	// Отрисовка названий остановок в лексикографическом порядке, без повторений одного и того же названия
+	// РћС‚СЂРёСЃРѕРІРєР° РЅР°Р·РІР°РЅРёР№ РѕСЃС‚Р°РЅРѕРІРѕРє РІ Р»РµРєСЃРёРєРѕРіСЂР°С„РёС‡РµСЃРєРѕРј РїРѕСЂСЏРґРєРµ, Р±РµР· РїРѕРІС‚РѕСЂРµРЅРёР№ РѕРґРЅРѕРіРѕ Рё С‚РѕРіРѕ Р¶Рµ РЅР°Р·РІР°РЅРёСЏ
 	DrawStopNames(transport_catalogue);
 
 	doc.Render(ostrm);
@@ -98,7 +90,7 @@ void MapRenderer::DrawLines(std::set<std::pair<const transport_catalogue::Bus*, 
 }
 
 void MapRenderer::SetLinesParameters(svg::Polyline& route_line, int& color_num) {
-	// Установить параметры линий
+	// РЈСЃС‚Р°РЅРѕРІРёС‚СЊ РїР°СЂР°РјРµС‚СЂС‹ Р»РёРЅРёР№
 	if (std::holds_alternative<std::string>(settings.color_palette[color_num])) {
 		route_line.SetStrokeColor(std::get<std::string>(settings.color_palette[color_num]));
 	}
@@ -115,7 +107,7 @@ void MapRenderer::SetLinesParameters(svg::Polyline& route_line, int& color_num) 
 }
 
 void MapRenderer::SetLinesCoordinates(std::pair<const transport_catalogue::Bus*, std::vector<const transport_catalogue::Stop*>>& route, svg::Polyline& route_line) {
-	// Отрисовать кольцевой маршрут 
+	// РћС‚СЂРёСЃРѕРІР°С‚СЊ РєРѕР»СЊС†РµРІРѕР№ РјР°СЂС€СЂСѓС‚ 
 	if (route.first->is_looped_) {
 		for (const transport_catalogue::Stop* stop : route.second) {
 			double x = (stop->coordinates.lng - min_lng) * zoom_coef + settings.padding;
@@ -124,7 +116,7 @@ void MapRenderer::SetLinesCoordinates(std::pair<const transport_catalogue::Bus*,
 		}
 		doc.Add(route_line);
 	}
-	// Отрисовать некольцевой маршрут
+	// РћС‚СЂРёСЃРѕРІР°С‚СЊ РЅРµРєРѕР»СЊС†РµРІРѕР№ РјР°СЂС€СЂСѓС‚
 	else if (!route.first->is_looped_) {
 		for (std::vector<const transport_catalogue::Stop*>::iterator stop_it = route.second.begin(); stop_it != route.second.end(); ++stop_it) {
 			const transport_catalogue::Stop* stop = *stop_it;
@@ -157,10 +149,10 @@ void MapRenderer::DrawBusNames(std::set<std::pair<const transport_catalogue::Bus
 }
 
 void MapRenderer::SetBusNamesSettings(std::pair<const transport_catalogue::Bus*, std::vector<const transport_catalogue::Stop*>>& route, svg::Text& route_underlayer_name, svg::Text& route_name, int& color_num) {
-	// Установить содержимое подложки и названия
+	// РЈСЃС‚Р°РЅРѕРІРёС‚СЊ СЃРѕРґРµСЂР¶РёРјРѕРµ РїРѕРґР»РѕР¶РєРё Рё РЅР°Р·РІР°РЅРёСЏ
 	route_underlayer_name.SetData(route.first->name_);
 	route_name.SetData(route.first->name_);
-	// Установить цвет подложки
+	// РЈСЃС‚Р°РЅРѕРІРёС‚СЊ С†РІРµС‚ РїРѕРґР»РѕР¶РєРё
 	if (std::holds_alternative<std::string>(settings.underlayer_color)) {
 		route_underlayer_name.SetFillColor(std::get<std::string>(settings.underlayer_color));
 	}
@@ -179,7 +171,7 @@ void MapRenderer::SetBusNamesSettings(std::pair<const transport_catalogue::Bus*,
 	else if (std::holds_alternative<svg::Rgba>(settings.underlayer_color)) {
 		route_underlayer_name.SetStrokeColor(std::get<svg::Rgba>(settings.underlayer_color));
 	}
-	// Установить цвет названия
+	// РЈСЃС‚Р°РЅРѕРІРёС‚СЊ С†РІРµС‚ РЅР°Р·РІР°РЅРёСЏ
 	if (std::holds_alternative<std::string>(settings.color_palette[color_num])) {
 		route_name.SetFillColor(std::get<std::string>(settings.color_palette[color_num]));
 	}
@@ -189,11 +181,11 @@ void MapRenderer::SetBusNamesSettings(std::pair<const transport_catalogue::Bus*,
 	else if (std::holds_alternative<svg::Rgba>(settings.color_palette[color_num])) {
 		route_name.SetFillColor(std::get<svg::Rgba>(settings.color_palette[color_num]));
 	}
-	// Установить остальные параметры подложки
+	// РЈСЃС‚Р°РЅРѕРІРёС‚СЊ РѕСЃС‚Р°Р»СЊРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹ РїРѕРґР»РѕР¶РєРё
 	route_underlayer_name.SetStrokeWidth(settings.underlayer_width);
 	route_underlayer_name.SetStrokeLineCap(svg::StrokeLineCap::ROUND);
 	route_underlayer_name.SetStrokeLineJoin(svg::StrokeLineJoin::ROUND);
-	// Установить общие для обоих объектов параметры
+	// РЈСЃС‚Р°РЅРѕРІРёС‚СЊ РѕР±С‰РёРµ РґР»СЏ РѕР±РѕРёС… РѕР±СЉРµРєС‚РѕРІ РїР°СЂР°РјРµС‚СЂС‹
 	route_underlayer_name.SetFontSize(settings.bus_label_font_size);
 	route_name.SetFontSize(settings.bus_label_font_size);
 	route_underlayer_name.SetFontFamily("Verdana");
@@ -203,7 +195,7 @@ void MapRenderer::SetBusNamesSettings(std::pair<const transport_catalogue::Bus*,
 }
 
 void MapRenderer::SetBusNamesCoordinates(std::pair<const transport_catalogue::Bus*, std::vector<const transport_catalogue::Stop*>>& route, svg::Text& route_underlayer_name, svg::Text& route_name) {
-	// Установить расположение подложки и названия 
+	// РЈСЃС‚Р°РЅРѕРІРёС‚СЊ СЂР°СЃРїРѕР»РѕР¶РµРЅРёРµ РїРѕРґР»РѕР¶РєРё Рё РЅР°Р·РІР°РЅРёСЏ 
 	if (route.first->is_looped_) {
 		const transport_catalogue::Stop* first = *route.second.begin();
 		double x = (first->coordinates.lng - min_lng) * zoom_coef + settings.padding;
@@ -243,7 +235,7 @@ void MapRenderer::SetBusNamesCoordinates(std::pair<const transport_catalogue::Bu
 }
 
 void MapRenderer::DrawStops(transport_catalogue::TransportCatalogue& transport_catalogue) {
-	// Чтобы не допустить повторной отрисовки остановки придётся итерироваться через buses_to_stops, поэтому routes не нужен - buses_to_stops заменяет его
+	// Р§С‚РѕР±С‹ РЅРµ РґРѕРїСѓСЃС‚РёС‚СЊ РїРѕРІС‚РѕСЂРЅРѕР№ РѕС‚СЂРёСЃРѕРІРєРё РѕСЃС‚Р°РЅРѕРІРєРё РїСЂРёРґС‘С‚СЃСЏ РёС‚РµСЂРёСЂРѕРІР°С‚СЊСЃСЏ С‡РµСЂРµР· buses_to_stops, РїРѕСЌС‚РѕРјСѓ routes РЅРµ РЅСѓР¶РµРЅ - buses_to_stops Р·Р°РјРµРЅСЏРµС‚ РµРіРѕ
 	std::unordered_map<std::string_view, std::set<std::string_view>> buses_to_stops = transport_catalogue.GetBTS();
 
 	const std::unordered_set<transport_catalogue::Stop, transport_catalogue::StopHasher>& stops = transport_catalogue.GetStops();
@@ -258,7 +250,7 @@ void MapRenderer::DrawStops(transport_catalogue::TransportCatalogue& transport_c
 }
 
 void MapRenderer::DrawStopNames(transport_catalogue::TransportCatalogue& transport_catalogue) {
-	// Чтобы не допустить повторной отрисовки остановки придётся итерироваться через buses_to_stops, поэтому routes не нужен - buses_to_stops заменяет его
+	// Р§С‚РѕР±С‹ РЅРµ РґРѕРїСѓСЃС‚РёС‚СЊ РїРѕРІС‚РѕСЂРЅРѕР№ РѕС‚СЂРёСЃРѕРІРєРё РѕСЃС‚Р°РЅРѕРІРєРё РїСЂРёРґС‘С‚СЃСЏ РёС‚РµСЂРёСЂРѕРІР°С‚СЊСЃСЏ С‡РµСЂРµР· buses_to_stops, РїРѕСЌС‚РѕРјСѓ routes РЅРµ РЅСѓР¶РµРЅ - buses_to_stops Р·Р°РјРµРЅСЏРµС‚ РµРіРѕ
 	std::unordered_map<std::string_view, std::set<std::string_view>> buses_to_stops = transport_catalogue.GetBTS();
 
 	const std::unordered_set<transport_catalogue::Stop, transport_catalogue::StopHasher>& stops = transport_catalogue.GetStops();
@@ -277,12 +269,12 @@ void MapRenderer::DrawStopNames(transport_catalogue::TransportCatalogue& transpo
 }
 
 void MapRenderer::SetBusNamesSettings(transport_catalogue::Stop& stop, svg::Text& stop_underlayer_name, svg::Text& stop_name) {
-	// Установить содержимое подложки и названия
+	// РЈСЃС‚Р°РЅРѕРІРёС‚СЊ СЃРѕРґРµСЂР¶РёРјРѕРµ РїРѕРґР»РѕР¶РєРё Рё РЅР°Р·РІР°РЅРёСЏ
 	stop_underlayer_name.SetData(stop.name_);
 	stop_name.SetData(stop.name_);
-	// Установить цвет названия
+	// РЈСЃС‚Р°РЅРѕРІРёС‚СЊ С†РІРµС‚ РЅР°Р·РІР°РЅРёСЏ
 	stop_name.SetFillColor("black");
-	// Установить цвет подложки
+	// РЈСЃС‚Р°РЅРѕРІРёС‚СЊ С†РІРµС‚ РїРѕРґР»РѕР¶РєРё
 	if (std::holds_alternative<std::string>(settings.underlayer_color)) {
 		stop_underlayer_name.SetFillColor(std::get<std::string>(settings.underlayer_color));
 	}
@@ -301,11 +293,11 @@ void MapRenderer::SetBusNamesSettings(transport_catalogue::Stop& stop, svg::Text
 	else if (std::holds_alternative<svg::Rgba>(settings.underlayer_color)) {
 		stop_underlayer_name.SetStrokeColor(std::get<svg::Rgba>(settings.underlayer_color));
 	}
-	// Установить остальные параметры подложки
+	// РЈСЃС‚Р°РЅРѕРІРёС‚СЊ РѕСЃС‚Р°Р»СЊРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹ РїРѕРґР»РѕР¶РєРё
 	stop_underlayer_name.SetStrokeWidth(settings.underlayer_width);
 	stop_underlayer_name.SetStrokeLineCap(svg::StrokeLineCap::ROUND);
 	stop_underlayer_name.SetStrokeLineJoin(svg::StrokeLineJoin::ROUND);
-	// Установить общие для обоих объектов параметры
+	// РЈСЃС‚Р°РЅРѕРІРёС‚СЊ РѕР±С‰РёРµ РґР»СЏ РѕР±РѕРёС… РѕР±СЉРµРєС‚РѕРІ РїР°СЂР°РјРµС‚СЂС‹
 	stop_underlayer_name.SetFontSize(settings.stop_label_font_size);
 	stop_name.SetFontSize(settings.stop_label_font_size);
 	stop_underlayer_name.SetFontFamily("Verdana");
@@ -315,7 +307,7 @@ void MapRenderer::SetBusNamesSettings(transport_catalogue::Stop& stop, svg::Text
 }
 
 void MapRenderer::SetBusNamesCoordinates(transport_catalogue::Stop& stop, svg::Text& stop_underlayer_name, svg::Text& stop_name) {
-	// Установить расположение подложки и названия 
+	// РЈСЃС‚Р°РЅРѕРІРёС‚СЊ СЂР°СЃРїРѕР»РѕР¶РµРЅРёРµ РїРѕРґР»РѕР¶РєРё Рё РЅР°Р·РІР°РЅРёСЏ 
 	double x = (stop.coordinates.lng - min_lng) * zoom_coef + settings.padding;
 	double y = (max_lat - stop.coordinates.lat) * zoom_coef + settings.padding;
 	stop_underlayer_name.SetPosition(svg::Point(x, y));

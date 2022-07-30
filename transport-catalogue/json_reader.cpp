@@ -1,4 +1,4 @@
-﻿#include "json_reader.h"
+#include "json_reader.h"
 
 
 using namespace transport_catalogue;
@@ -9,10 +9,11 @@ using namespace request_handler;
 using namespace json_reader;
 
 JsonReader::JsonReader(transport_catalogue::TransportCatalogue& catalog, map_renderer::MapRenderer& map_renderer)
-: catalog_(catalog), map_renderer_(map_renderer)
+    : catalog_(catalog), map_renderer_(map_renderer)
 {
 }
 
+//  DEPRECATED
 void JsonReader::Reader(std::istream& input, std::ostream& output) {
     //Timer timer("READER");
     Dict root = Load(input).GetRoot().AsMap();
@@ -28,6 +29,34 @@ void JsonReader::Reader(std::istream& input, std::ostream& output) {
 
     RequestHandler request_handler(catalog_, map_renderer_, router_settings);
     request_handler.ProcessRequest(content_state, output);
+}
+
+void JsonReader::MakeBase(std::istream& input) {
+    Dict root = Load(input).GetRoot().AsMap();
+    auto content_base = root.find("base_requests"s);
+    auto render_info = root.find("render_settings");
+    auto routing_settings = root.find("routing_settings"s);
+
+    if (content_base != root.end()) {
+        auto cb = content_base->second.AsArray();
+        CompleteCatalog(cb);
+    }
+    if (render_info != root.end()) {
+        Render(render_info->second.AsMap());
+    }
+    transport_router::RouterSettings router_settings;
+    if (routing_settings != root.end()) {
+        auto rs = routing_settings->second.AsMap();
+        router_settings = SetRouterSettings(rs);
+    }
+
+    const auto serialization_settings = root.find("serialization_settings");
+    if (serialization_settings != root.end())
+    {
+        transport_router::TransportRouter router(catalog_, router_settings);
+        serialize::Serializer serializer(catalog_, map_renderer_, router);
+        serializer.Serialize(serialization_settings->second.AsMap().at("file").AsString());
+    }
 }
 
 ////////// base_requests //////////
@@ -184,7 +213,8 @@ void JsonReader::RenderVariantSettings(const Dict& value) {
     }
 
     // Color palette
-    std::vector<std::variant<std::string, svg::Rgb, svg::Rgba>> color_palette;
+    //std::vector<std::variant<std::string, svg::Rgb, svg::Rgba>> color_palette;
+    std::vector<svg::Color> color_palette;
     Array color_palette_arr = value.at("color_palette").AsArray();
     for (Node node : color_palette_arr) {
         if (node.IsString()) {
@@ -227,3 +257,6 @@ transport_router::RouterSettings JsonReader::SetRouterSettings(json::Dict& routi
     settings.bus_velocity_ = static_cast<double>(routing_settings.at("bus_velocity").AsInt()) * (1000. / 60.);
     return settings;
 }
+
+
+

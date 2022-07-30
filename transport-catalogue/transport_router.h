@@ -1,6 +1,7 @@
 #pragma once
 
-#include<unordered_map>
+#include <unordered_map>
+#include <memory>
 
 #include "transport_catalogue.h"
 #include "router.h"
@@ -32,7 +33,7 @@ namespace transport_router {
 	class TransportRouter {
 	public:
 		TransportRouter(transport_catalogue::TransportCatalogue& TC, RouterSettings& router_settings);
-		std::optional<std::vector<RouterInfo>> FindFastestRoute(const std::string from, const std::string to);
+		std::optional<std::vector<RouterInfo>> FindFastestRoute(const std::string from, const std::string to) const;
 		const RouterSettings GetRouterSettings() const;
 
 	private:

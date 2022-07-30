@@ -10,7 +10,8 @@ namespace json_reader {
 	class JsonReader {
 	public:
 		JsonReader(transport_catalogue::TransportCatalogue& catalog, map_renderer::MapRenderer& map_renderer);
-		void Reader(std::istream& input, std::ostream& output);
+		void Reader(std::istream& input, std::ostream& output); // DEPRECATED
+		void MakeBase(std::istream& input);
 
 	private:
 		////////// base_requests //////////
@@ -24,7 +25,7 @@ namespace json_reader {
 		void RenderArraySettings(const json::Dict& value);
 		void RenderVariantSettings(const json::Dict& value);
 
-		////////// routing_settings //////////
+		////////// router_settings //////////
 		transport_router::RouterSettings SetRouterSettings(json::Dict& routing_settings);  ////////////////////////////////////////////////////
 
 	private:

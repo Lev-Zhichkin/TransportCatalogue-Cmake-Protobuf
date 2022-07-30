@@ -56,9 +56,13 @@ size_t BusPtrHasher::operator()(const Bus* bus) const {
 	return static_cast<size_t>(hasher_(bus->name_));
 }
 
+size_t PairStopsHasher::operator() (const std::pair<const transport_catalogue::Stop*, const transport_catalogue::Stop*>& stops) const {
+	return pair_hasher_(stops.first) + pair_hasher_(stops.second);
+}
+
 // Main code
 
-size_t TransportCatalogue::StopsHasher::operator()(const std::pair<const Stop*, const Stop*>& two_stops) const {
+size_t StopsHasher::operator()(const std::pair<const Stop*, const Stop*>& two_stops) const {
 	size_t h_1 = hasher_(two_stops.first);
 	size_t h_2 = hasher_(two_stops.second);
 	return h_2 * 12 + h_1 * (12 * 12);
@@ -70,10 +74,31 @@ void TransportCatalogue::AddStop(string& name, double latitude, double longitude
 	buses_to_stops[FindStop(name).name_];
 }
 
+void TransportCatalogue::AddStopSerialization(std::string_view name, double latitude, double longitude) {
+	Stop stop(string(name), latitude, longitude);
+	stops_.insert(std::move(stop));
+	buses_to_stops[FindStop(string(name)).name_];
+}
+
 void TransportCatalogue::AddBus(string& name, std::vector<const Stop*>& stops_of_bus, bool is_looped) {
 	Bus bus(name, stops_of_bus, is_looped);
 	buses_.insert(std::move(bus));
 	const Bus* from_buses_ = &FindBus(name);
+	stops_to_buses[from_buses_->name_];
+	for (const Stop* stop : from_buses_->stops_of_bus_) {
+		buses_to_stops[stop->name_].insert(from_buses_->name_);
+		stops_to_buses[from_buses_->name_].insert(stop->name_);
+	}
+}
+
+void TransportCatalogue::AddBusSerialization(const std::string_view name, const std::vector<std::string_view>& stops, const bool is_looped) {
+	std::vector<const Stop*> stops_of_bus;
+	for (std::string_view sv : stops) {
+		stops_of_bus.push_back(&FindStop(string(sv)));
+	}
+	Bus bus(string(name), stops_of_bus, is_looped);
+	buses_.insert(std::move(bus));
+	const Bus* from_buses_ = &FindBus(string(name));
 	stops_to_buses[from_buses_->name_];
 	for (const Stop* stop : from_buses_->stops_of_bus_) {
 		buses_to_stops[stop->name_].insert(from_buses_->name_);
@@ -105,6 +130,19 @@ void TransportCatalogue::SetBusInfo(const string& name) {
 
 	BusInfo bi;
 	const Bus& bus = FindBus(name);
+
+	if (bus.is_looped_) {
+		bus_infos[bus.name_] = transport_catalogue::SetBusInfo_parts::create_looped_bus_info(*this, bi, bus);
+	}
+	else {
+		bus_infos[bus.name_] = transport_catalogue::SetBusInfo_parts::create_turning_bus_info(*this, bi, bus);
+	}
+
+}
+
+void TransportCatalogue::SetBusInfo(const Bus& bus) {
+
+	BusInfo bi;
 
 	if (bus.is_looped_) {
 		bus_infos[bus.name_] = transport_catalogue::SetBusInfo_parts::create_looped_bus_info(*this, bi, bus);
@@ -249,4 +287,8 @@ const std::unordered_set<Stop, StopHasher>& TransportCatalogue::GetStops() const
 
 const std::unordered_set<Bus, BusHasher>& TransportCatalogue::GetBuses() const {
 	return buses_;
+}
+
+const std::unordered_map<const std::pair<const Stop*, const Stop*>, double, StopsHasher>  TransportCatalogue::GetAllDistances() const {
+	return stop_pair_to_distance_;
 }

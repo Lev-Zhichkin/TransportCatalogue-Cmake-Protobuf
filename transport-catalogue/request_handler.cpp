@@ -8,7 +8,7 @@ using namespace std::literals;
 using namespace request_handler;
 
 request_handler::RequestHandler::RequestHandler(transport_catalogue::TransportCatalogue& catalog, map_renderer::MapRenderer& map_renderer, transport_router::RouterSettings router_settings)
-: catalog_(catalog), map_renderer_(map_renderer), transport_router_(catalog, router_settings)
+    : catalog_(catalog), map_renderer_(map_renderer), transport_router_(catalog, router_settings)
 {
 }
 
@@ -63,7 +63,7 @@ void RequestHandler::PrintStopInformation(const Dict& value, std::ostream& outpu
     Stop stop = catalog_.FindStop(name);
 
     if (stop.name_ == "Error"s) {
-        //типа вывести это
+        //С‚РёРїР° РІС‹РІРµСЃС‚Рё СЌС‚Рѕ
         Print(json::Document(json::Builder{}.StartDict().Key("request_id"s).Value(id).Key("error_message"s).Value("not found"s).EndDict().Build()), output);
     }
     else {
@@ -135,4 +135,8 @@ void RequestHandler::PrintRoute(const Dict& value, std::ostream& output) {
     }
 
     Print(json::Document(json::Builder{}.StartDict().Key("request_id"s).Value(id).Key("total_time"s).Value(total_time).Key("items"s).Value(items).EndDict().Build().AsMap()), output);
+}
+
+const transport_router::TransportRouter& RequestHandler::GetTransportRouter() {
+    return transport_router_;
 }

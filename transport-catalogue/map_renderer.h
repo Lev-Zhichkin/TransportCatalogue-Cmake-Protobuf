@@ -27,18 +27,24 @@ namespace map_renderer {
 			svg::Point bus_label_offset = svg::Point(0, 0);
 			int stop_label_font_size = 20;
 			svg::Point stop_label_offset = svg::Point(0, -0);
-			std::variant<std::string, svg::Rgb, svg::Rgba> underlayer_color = svg::Rgba{ 0, 0, 0, 1 };
+			//std::variant<std::string, svg::Rgb, svg::Rgba> underlayer_color = svg::Rgba{ 0, 0, 0, 1 };
+			svg::Color underlayer_color = svg::Rgba{ 0, 0, 0, 1 };
 			double underlayer_width = 0;
-			std::vector<std::variant<std::string, svg::Rgb, svg::Rgba>> color_palette = { svg::Rgb{ 0, 0, 0 } };
+			//std::vector<std::variant<std::string, svg::Rgb, svg::Rgba>> color_palette = { svg::Rgb{ 0, 0, 0 } };
+			std::vector<svg::Color> color_palette;
 		};
 
 	private:
 		struct routes_comparator {
-			bool operator() (std::pair<const transport_catalogue::Bus*, std::vector<const transport_catalogue::Stop*>> a, std::pair<const transport_catalogue::Bus*, std::vector<const transport_catalogue::Stop*>> b) const;
+			bool operator() (std::pair<const transport_catalogue::Bus*, std::vector<const transport_catalogue::Stop*>> a, std::pair<const transport_catalogue::Bus*, std::vector<const transport_catalogue::Stop*>> b) const {
+				return a.first->name_ < b.first->name_;
+			}
 		};
 
 		struct stops_comparator {
-			bool operator() (transport_catalogue::Stop a, transport_catalogue::Stop b) const;
+			bool operator() (transport_catalogue::Stop a, transport_catalogue::Stop b) const {
+				return a.name_ < b.name_;
+			}
 		};
 
 	public:

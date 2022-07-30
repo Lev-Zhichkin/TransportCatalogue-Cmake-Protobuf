@@ -25,7 +25,7 @@ TransportRouter::TransportRouter(transport_catalogue::TransportCatalogue& TC, Ro
 	router_ = std::make_unique<graph::Router<RouteData>>(graph_);
 }
 
-std::optional<std::vector<RouterInfo>> TransportRouter::FindFastestRoute(const std::string from, const std::string to) {
+std::optional<std::vector<RouterInfo>> TransportRouter::FindFastestRoute(const std::string from, const std::string to) const {
 	if (from == to) {
 		return std::vector<RouterInfo>{};
 	}

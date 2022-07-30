@@ -1,18 +1,36 @@
 #pragma once
 
-#include <iostream>
+#include "geo.h"
+#include "transport_catalogue.h"
+
 #include <string>
-#include <chrono>
-#include <memory>
+#include <set>
+#include <unordered_set>
+#include <vector>
 
-class Timer
+namespace domain
 {
-public:
-	Timer(const std::string text);
-	~Timer();
-	void Stop();
+	struct RoutingSettings
+	{
+		int bus_wait_time = 0;
+		double bus_velocity = 0.0;
+	};
 
-private:
-	std::chrono::time_point<std::chrono::high_resolution_clock> m_StartTimepoint;
-	std::string text_;
-};
+	struct StopStat
+	{
+		StopStat(const std::string_view stop_name, const std::set<std::string_view>& buses);
+		std::string stop_name;
+		std::set<std::string_view> buses;
+	};
+
+	struct BusStat
+	{
+		BusStat(const std::string_view bus_num, const int stops_on_route, const int unique_stops, const int64_t route_length, const double curvature);
+		std::string bus_num;
+		int stops_on_route;
+		int unique_stops;
+		int64_t route_length;
+		double curvature;
+	};
+
+} // namespace domain
